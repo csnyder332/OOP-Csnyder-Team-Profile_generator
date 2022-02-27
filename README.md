@@ -1,1 +1,1 @@
-# OOP-CSnyder-Team-Profile_generator
+# OOP-CSnyder-Team-Profile-generator
