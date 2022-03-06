@@ -42,3 +42,9 @@
 
   ## License
   ![NPM](https://img.shields.io/npm/l/inquirer)
+  
+  ## Resources
+  W3Schools  
+  Github  
+  MDN
+ 
