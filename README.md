@@ -29,7 +29,8 @@
 
 
   ## Features
-  N/A
+  ![image](https://user-images.githubusercontent.com/95385092/156936149-7d860ac1-5915-47bc-9c33-787faa2f59b9.png)
+
 
   ## Tests
   Yes, via jest
