@@ -1,112 +1,129 @@
-const inquirer = require('inquirer');
-const fs = require('fs');
-const Manager = require('./lib/Manager');
-const Engineer = require('./lib/Engineer');
-const Intern = require('./lib/Intern');
+const generateHTML = require("./src/generateHTML");
+// packages needed for the application
+const inquirer = require("inquirer");
+const fs = require("fs");
+//employee profiles
+const Manager = require("./lib/Manager");
+const Engineer = require("./lib/Engineer");
+const Intern = require("./lib/Intern");
+const teamArray = [];
+//prompts for creating team
+const addManager = () => {
+  return inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "Manager name",
+        name: "name",
+      },
+      {
+        type: "input",
+        message: "Manager ID number",
+        name: "id",
+      },
+      {
+        type: "input",
+        message: "Manager email address",
+        name: "email",
+      },
+      {
+        type: "input",
+        message: "Manager office number",
+        name: "officeNumber",
+      },
+    ])
+    .then((managerInput) => {
+      const { name, id, email, officeNumber } = managerInput;
+      const manager = new Manager(name, id, email, officeNumber);
+      teamArray.push(manager);
+    });
+};
 
+const addEmployee = () => {
+  return inquirer
+    .prompt([
+      {
+        type: "list",
+        message:
+          "Add employees?",
+        choices: ["Engineer", "Intern"],
+        name: "role",
+      },
+      {
+        type: "input",
+        message: "Employee name",
+        name: "name",
+      },
+      {
+        type: "input",
+        message: "Employee ID number",
+        name: "id",
+      },
+      {
+        type: "input",
+        message: "Employee email address",
+        name: "email",
+      },
+      {
+        type: "input",
+        message: "Employee GitHub username",
+        when: (input) => input.role === "Engineer",
+        name: "github",
+      },
+      {
+        type: "input",
+        message: "Employee school name",
+        when: (input) => input.role === "Intern",
+        name: "school",
+      },
+      {
+        type: "confirm",
+        message: "Would you like to add more employees?",
+        default: false,
+        name: "confirmEmployee",
+      },
+    ])
 
-const team = [];
+    .then((employeeData) => {
+      let { name, id, email, role, github, school, confirmEmployee } =
+        employeeData;
+      let employee;
 
-function appStart() {
-    createHTML();
-    addEmployees();
-}
+      if (role === "Engineer") {
+        employee = new Engineer(name, id, email, github);
+      } else if (role === "Intern") {
+        employee = new Intern(name, id, email, school);
+      }
+      teamArray.push(employee);
 
-   function addEmployees() {
-    inquirer.prompt({
-        message: 'Enter manager name',
-        name: 'name'
-    })
-//         {
-//             message: 'Enter manager id',
-//             name: 'id'
-//         },
-//         {
-//             message: "Enter manager email address",
-//             name: 'email'
-//         },
-//         {
-//             message: "Enter manager office number",
-//             name: 'officeNumber'
-//         },
-//         {
-//             type: 'list',
-//             message: 'Would you like to add more team members?',
-//             choices: [Yes, No]
+      if (confirmEmployee) {
+        return addEmployee(teamArray);
+      } else {
+        return teamArray;
+      }
+    });
+};
+//function to write the HTML
+//writeFileSync
+const writeFile = (data) => {
+  fs.writeFile("./dist/index.html", data, (err) => {
+    if (err) {
+      console.log(err);
+      return;
+    } else {
+      console.log("Employee list generated!");
+    }
+  });
+};
 
-//         },
-//         {
-//             type: 'list',
-//             message: 'Select next employee role',
-//             Choices: [
-//                 'Engineer',
-//                 'Intern',
-//             ],
-//             name: addMoreRoles
-//         })
-//         .then(function (addMoreRoles) {
-//             if (addMoreRoles === Engineer) {
-//                 addEngineer();
-
-//             } else (addMoreRoles === Intern)  {
-//                 addIntern();
-//             }
-//         },
-
-// function addEngineer() {
-//                 inquirer.prompt(
-//                     {
-//                         message: 'Enter engineer name',
-//                         name: 'name'
-//                     },
-//                     {
-//                         message: 'Enter engineer id',
-//                         name: 'id'
-//                     },
-//                     {
-//                         message: "Enter engineer email address",
-//                         name: 'email'
-//                     },
-//                     {
-//                         message: "Enter engineer Github username",
-//                         name: 'github'
-//                     })
-//             }
-
-//         function addIntern() {
-//                 inquirer.prompt(
-//                     {
-//                         message: 'Enter intern name',
-//                         name: 'name'
-//                     },
-//                     {
-//                         message: 'Enter intern id',
-//                         name: 'id'
-//                     },
-//                     {
-//                         message: "Enter intern email address",
-//                         name: 'email'
-//                     },
-//                     {
-//                         message: "Enter engineer school",
-//                         name: 'school'
-//                     });
-
-//                 inquirer.prompt(
-//                     {
-//                         type: 'list',
-//                         message: 'Would you like to add more team members?',
-//                         choices: [Yes, No],
-//                         name: moreEmployees
-
-//                     }
-//                         .then(function () {
-//                             if (moreEmployees === "yes") {
-//                                 addMoreRoles();
-//                             } else {
-//                                 finishHtml();
-//                             }
-//                         })
-
-
-
+addManager()
+  .then(addEmployee)
+  .then((teamArray) => {
+    return generateHTML(teamArray);
+  })
+  .then((pageHTML) => {
+    return writeFile(pageHTML);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
